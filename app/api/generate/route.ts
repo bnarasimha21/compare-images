@@ -227,8 +227,9 @@ export async function POST(request: NextRequest) {
     // Use MODEL_ACCESS_KEY if available, otherwise fall back to FAL_AI_API_KEY
     const apiKey = process.env.MODEL_ACCESS_KEY || process.env.FAL_AI_API_KEY
     if (!apiKey) {
+      console.error('API key check failed. MODEL_ACCESS_KEY:', !!process.env.MODEL_ACCESS_KEY, 'FAL_AI_API_KEY:', !!process.env.FAL_AI_API_KEY)
       return NextResponse.json(
-        { error: 'Gradient API key is not configured. Please set MODEL_ACCESS_KEY or FAL_AI_API_KEY in your .env.local file.' },
+        { error: 'Gradient API key is not configured. Please set MODEL_ACCESS_KEY or FAL_AI_API_KEY in your App Platform environment variables.' },
         { status: 400 }
       )
     }
