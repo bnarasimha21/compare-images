@@ -22,11 +22,20 @@ export default function Home() {
   })
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [gameRound, setGameRound] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
+  const [gameStats, setGameStats] = useState({ correct: 0, total: 0 })
 
   const generateNewImage = async () => {
     console.log('Generate New Image function called')
     if (loading) {
       console.log('Already loading, ignoring click')
+      return
+    }
+    
+    // Check if game is over
+    if (gameRound >= 10) {
+      setGameOver(true)
       return
     }
     
@@ -66,6 +75,7 @@ export default function Home() {
           promptOptions: data.promptOptions,
           createdAt: new Date(),
         })
+        setGameRound(prev => prev + 1)
       } catch (fetchError: any) {
         clearTimeout(timeoutId)
         if (fetchError.name === 'AbortError') {
@@ -96,7 +106,29 @@ export default function Home() {
     }
     
     saveGuess(guess)
-    setStats(getStats())
+    const updatedStats = getStats()
+    setStats(updatedStats)
+    
+    // Update game stats
+    setGameStats(prev => ({
+      correct: prev.correct + (guess.isCorrect ? 1 : 0),
+      total: prev.total + 1,
+    }))
+    
+    // Check if this was the 10th image
+    if (gameRound >= 10) {
+      setGameOver(true)
+    }
+  }
+  
+  const startNewGame = () => {
+    setGameRound(0)
+    setGameOver(false)
+    setCurrentImage(null)
+    setGuessedPrompt(null)
+    setShowResult(false)
+    setGameStats({ correct: 0, total: 0 })
+    setError(null)
   }
 
   useEffect(() => {
@@ -119,22 +151,59 @@ export default function Home() {
 
         {mounted && <GameStats stats={stats} onClear={clearStats} />}
 
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
-          {!currentImage && !loading && (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg mb-6">
-                Click the button below to start guessing!
+        {gameOver ? (
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 text-center">
+            <div className="text-6xl mb-6">🎉</div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Game Over!</h2>
+            <p className="text-xl text-gray-600 mb-8">
+              You completed 10 rounds!
+            </p>
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 mb-6">
+              <p className="text-2xl font-bold text-gray-800 mb-2">
+                Final Score: {gameStats.correct} / {gameStats.total}
               </p>
-              <button
-                onClick={generateNewImage}
-                disabled={loading}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                type="button"
-              >
-                🎲 Generate New Image
-              </button>
+              <p className="text-lg text-gray-600">
+                Accuracy: {gameStats.total > 0 ? ((gameStats.correct / gameStats.total) * 100).toFixed(1) : 0}%
+              </p>
             </div>
-          )}
+            <button
+              onClick={startNewGame}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg"
+            >
+              🎮 Start New Game
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
+            {gameRound > 0 && (
+              <div className="mb-4 text-center">
+                <p className="text-lg font-semibold text-gray-700">
+                  Round {gameRound} / 10
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                  <div
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${(gameRound / 10) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            {!currentImage && !loading && (
+              <div className="text-center py-12">
+                <p className="text-gray-600 text-lg mb-6">
+                  Click the button below to start guessing! (10 rounds)
+                </p>
+                <button
+                  onClick={generateNewImage}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  type="button"
+                >
+                  🎲 Generate New Image
+                </button>
+              </div>
+            )}
 
           {loading && (
             <div className="text-center py-12">
@@ -214,18 +283,28 @@ export default function Home() {
                     </>
                   )}
                   <div className="flex gap-4 justify-center">
-                    <button
-                      onClick={generateNewImage}
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg"
-                    >
-                      🎲 Next Image
-                    </button>
+                    {gameRound < 10 ? (
+                      <button
+                        onClick={generateNewImage}
+                        className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg"
+                      >
+                        🎲 Next Image ({10 - gameRound} left)
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setGameOver(true)}
+                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg"
+                      >
+                        🎉 Finish Game
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
             </>
           )}
-        </div>
+          </div>
+        )}
       </div>
     </main>
   )
