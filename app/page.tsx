@@ -34,7 +34,7 @@ export default function Home() {
     }
     
     // Check if game is over
-    if (gameRound >= 3) {
+    if (gameRound >= 10) {
       setGameOver(true)
       return
     }
@@ -115,8 +115,8 @@ export default function Home() {
       total: prev.total + 1,
     }))
     
-    // Check if this was the 3rd image
-    if (gameRound >= 3) {
+    // Check if this was the 10th image
+    if (gameRound >= 10) {
       setGameOver(true)
     }
   }
@@ -151,14 +151,14 @@ export default function Home() {
           </p>
         </div>
 
-        {mounted && <GameStats stats={stats} onClear={clearStats} />}
+        {mounted && <GameStats stats={stats} />}
 
         {gameOver ? (
           <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 text-center">
             <div className="text-6xl mb-6">🎉</div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Game Over!</h2>
             <p className="text-xl text-gray-600 mb-8">
-              You completed 3 rounds!
+              You completed 10 rounds!
             </p>
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 mb-6">
               <p className="text-2xl font-bold text-gray-800 mb-2">
@@ -180,12 +180,12 @@ export default function Home() {
             {gameRound > 0 && (
               <div className="mb-4 text-center">
                 <p className="text-lg font-semibold text-gray-700">
-                  Round {gameRound} / 3
+                  Round {gameRound} / 10
                 </p>
                 <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                   <div
                     className="bg-gradient-to-r from-purple-600 to-blue-600 h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${(gameRound / 3) * 100}%` }}
+                    style={{ width: `${(gameRound / 10) * 100}%` }}
                   ></div>
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function Home() {
             {!currentImage && !loading && (
               <div className="text-center py-12">
                 <p className="text-gray-600 text-lg mb-6">
-                  Click the button below to start guessing! (3 rounds)
+                  Click the button below to start guessing! (10 rounds)
                 </p>
                 <button
                   onClick={generateNewImage}
@@ -285,12 +285,12 @@ export default function Home() {
                     </>
                   )}
                   <div className="flex gap-4 justify-center">
-                    {gameRound < 3 ? (
+                    {gameRound < 10 ? (
                       <button
                         onClick={generateNewImage}
                         className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg"
                       >
-                        🎲 Next Image ({3 - gameRound} left)
+                        🎲 Next Image ({10 - gameRound} left)
                       </button>
                     ) : (
                       <button

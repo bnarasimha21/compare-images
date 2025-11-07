@@ -4,24 +4,17 @@ import type { GameStats as GameStatsType } from '@/types'
 
 interface GameStatsProps {
   stats: GameStatsType
-  onClear: () => void
 }
 
-export default function GameStats({ stats, onClear }: GameStatsProps) {
+export default function GameStats({ stats }: GameStatsProps) {
   if (stats.totalGuesses === 0) {
     return null
   }
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Your Stats</h2>
-        <button
-          onClick={onClear}
-          className="text-sm text-gray-500 hover:text-gray-700 underline"
-        >
-          Clear Stats
-        </button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
